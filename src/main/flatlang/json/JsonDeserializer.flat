@@ -7,7 +7,7 @@ import "flatlang/io/FileReader"
 import "flatlang/extensions/SyntaxStringFunctions"
 
 class {
-    public parse(File file) => parse(new FileReader(file).readAllContents())
+    public parse(File file) => parse(FileReader(file).readAllContents())
 
     public parse(String json) -> Object {
         if (isObject(json)) {
@@ -15,7 +15,7 @@ class {
         } else if (isArray(json)) {
             return parseArray(json)
         } else {
-            throw new InvalidParseException()
+            throw InvalidParseException()
         }
     }
 
@@ -27,7 +27,7 @@ class {
         } else if (isString(value)) {
             return value.trimEnds(1)
         } else if (isBool(value)) {
-            return new Bool(Bool.fromString(value))
+            return Bool(Bool.fromString(value))
         } else {
             return value
         }
@@ -37,9 +37,9 @@ class {
         let trimmed = json.trim()
 
         if (trimmed.first != '[') {
-            throw new InvalidParseException("Not a JSON array")
+            throw InvalidParseException("Not a JSON array")
         } else if (trimmed.last != ']') {
-            throw new MissingMatchingTokenException(']')
+            throw MissingMatchingTokenException(']')
         }
 
         let contents = trimmed.trimEnds(1, true)
@@ -55,16 +55,16 @@ class {
     public isString(String json) => isSingleQuoteString(json) || isDoubleQuoteString(json)
     public isBool(String json) => json == "true" || json == "false"
 
-    public parseObject(File file) => parseObject(new FileReader(file).readAllContents())
-    public parseObject(File file, HashMap<String, Object> map) => parseObject(new FileReader(file).readAllContents(), map)
-    public parseObject(String json) => parseObject(json, new HashMap(5, 5))
+    public parseObject(File file) => parseObject(FileReader(file).readAllContents())
+    public parseObject(File file, HashMap<String, Object> map) => parseObject(FileReader(file).readAllContents(), map)
+    public parseObject(String json) => parseObject(json, HashMap(5, 5))
     public parseObject(String json, HashMap<String, Object> map) => map {
         let trimmed = json.trim()
 
         if (trimmed.first != '{') {
-            throw new InvalidParseException("Not a JSON object")
+            throw InvalidParseException("Not a JSON object")
         } else if (trimmed.last != '}') {
-            throw new MissingMatchingTokenException('}')
+            throw MissingMatchingTokenException('}')
         }
 
         let contents = trimmed.trimEnds(1, true)
@@ -74,7 +74,7 @@ class {
             let colonIndex = prop.findCharOnTopLevel(':')
 
             if (colonIndex == -1) {
-                throw new InvalidParseException("Not a valid JSON object")
+                throw InvalidParseException("Not a valid JSON object")
             }
 
             let split = [prop.substring(0, colonIndex).trim(), prop.substring(colonIndex + 1).trim()]
