@@ -7,91 +7,91 @@ import "flatlang/io/FileReader"
 import "flatlang/extensions/SyntaxStringFunctions"
 
 class {
-    public parse(File file) => parse(FileReader(file).readAllContents())
+  public parse(File file) => parse(FileReader(file).readAllContents())
 
-    public parse(String json) -> Object {
-        if (isObject(json)) {
-            return parseObject(json)
-        } else if (isArray(json)) {
-            return parseArray(json)
-        } else {
-            throw InvalidParseException()
-        }
+  public parse(String json) -> Object {
+    if (isObject(json)) {
+      return parseObject(json)
+    } else if (isArray(json)) {
+      return parseArray(json)
+    } else {
+      throw InvalidParseException()
+    }
+  }
+
+  parseValue(String value) -> Object {
+    if (isObject(value)) {
+      return parseObject(value)
+    } else if (isArray(value)) {
+      return parseArray(value)
+    } else if (isString(value)) {
+      return value.trimEnds(1)
+    } else if (isBool(value)) {
+      return Bool(Bool.fromString(value))
+    } else {
+      return value
+    }
+  }
+
+  public parseArray(String json) -> Object[] => null {
+    let trimmed = json.trim()
+
+    if (trimmed.first != '[') {
+      throw InvalidParseException("Not a JSON array")
+    } else if (trimmed.last != ']') {
+      throw MissingMatchingTokenException(']')
     }
 
-    parseValue(String value) -> Object {
-        if (isObject(value)) {
-            return parseObject(value)
-        } else if (isArray(value)) {
-            return parseArray(value)
-        } else if (isString(value)) {
-            return value.trimEnds(1)
-        } else if (isBool(value)) {
-            return Bool(Bool.fromString(value))
-        } else {
-            return value
-        }
+    let contents = trimmed.trimEnds(1, true)
+    let values = contents.splitAtCommas(allowTrailing: true)
+
+    return values.map({ parseValue(_) })
+  }
+
+  public isObject(String json) => (let trimmed = json.trim()).first == '{' && trimmed.findEndingMatch(0, '{', '}') == trimmed.count - 1
+  public isArray(String json) => (let trimmed = json.trim()).first == '[' && trimmed.findEndingMatch(0, '[', ']') == trimmed.count - 1
+  public isSingleQuoteString(String json) => (let trimmed = json.trim()).first == '\'' && trimmed.findEndingSingleQuote(0) == trimmed.count - 1
+  public isDoubleQuoteString(String json) => (let trimmed = json.trim()).first == '"' && trimmed.findEndingQuote(0) == trimmed.count - 1
+  public isString(String json) => isSingleQuoteString(json) || isDoubleQuoteString(json)
+  public isBool(String json) => json == "true" || json == "false"
+
+  public parseObject(File file) => parseObject(FileReader(file).readAllContents())
+  public parseObject(File file, HashMap<String, Object> map) => parseObject(FileReader(file).readAllContents(), map)
+  public parseObject(String json) => parseObject(json, HashMap(5, 5))
+  public parseObject(String json, HashMap<String, Object> map) => map {
+    let trimmed = json.trim()
+
+    if (trimmed.first != '{') {
+      throw InvalidParseException("Not a JSON object")
+    } else if (trimmed.last != '}') {
+      throw MissingMatchingTokenException('}')
     }
 
-    public parseArray(String json) -> Object[] => null {
-        let trimmed = json.trim()
+    let contents = trimmed.trimEnds(1, true)
+    let properties = contents.splitAtCommas(allowTrailing: true)
 
-        if (trimmed.first != '[') {
-            throw InvalidParseException("Not a JSON array")
-        } else if (trimmed.last != ']') {
-            throw MissingMatchingTokenException(']')
-        }
+    properties.forEach(prop => {
+      let colonIndex = prop.findCharOnTopLevel(':')
 
-        let contents = trimmed.trimEnds(1, true)
-        let values = contents.splitAtCommas(allowTrailing: true)
+      if (colonIndex == -1) {
+        throw InvalidParseException("Not a valid JSON object")
+      }
 
-        return values.map({ parseValue(_) })
-    }
+      let split = [prop.substring(0, colonIndex).trim(), prop.substring(colonIndex + 1).trim()]
 
-    public isObject(String json) => (let trimmed = json.trim()).first == '{' && trimmed.findEndingMatch(0, '{', '}') == trimmed.count - 1
-    public isArray(String json) => (let trimmed = json.trim()).first == '[' && trimmed.findEndingMatch(0, '[', ']') == trimmed.count - 1
-    public isSingleQuoteString(String json) => (let trimmed = json.trim()).first == '\'' && trimmed.findEndingSingleQuote(0) == trimmed.count - 1
-    public isDoubleQuoteString(String json) => (let trimmed = json.trim()).first == '"' && trimmed.findEndingQuote(0) == trimmed.count - 1
-    public isString(String json) => isSingleQuoteString(json) || isDoubleQuoteString(json)
-    public isBool(String json) => json == "true" || json == "false"
+      if (isString(split.first)) {
+        split[0] = split.first.trimEnds(1)
+      }
 
-    public parseObject(File file) => parseObject(FileReader(file).readAllContents())
-    public parseObject(File file, HashMap<String, Object> map) => parseObject(FileReader(file).readAllContents(), map)
-    public parseObject(String json) => parseObject(json, HashMap(5, 5))
-    public parseObject(String json, HashMap<String, Object> map) => map {
-        let trimmed = json.trim()
+      map[split.first] = parseValue(split.last)
+    })
+  }
 
-        if (trimmed.first != '{') {
-            throw InvalidParseException("Not a JSON object")
-        } else if (trimmed.last != '}') {
-            throw MissingMatchingTokenException('}')
-        }
+  class InvalidParseException extends Exception {
+    public construct(String message = "Invalid parse") => super(message)
+  }
 
-        let contents = trimmed.trimEnds(1, true)
-        let properties = contents.splitAtCommas(allowTrailing: true)
-
-        properties.forEach(prop => {
-            let colonIndex = prop.findCharOnTopLevel(':')
-
-            if (colonIndex == -1) {
-                throw InvalidParseException("Not a valid JSON object")
-            }
-
-            let split = [prop.substring(0, colonIndex).trim(), prop.substring(colonIndex + 1).trim()]
-
-            if (isString(split.first)) {
-                split[0] = split.first.trimEnds(1)
-            }
-
-            map[split.first] = parseValue(split.last)
-        })
-    }
-
-    class InvalidParseException extends Exception {
-        public construct(String message = "Invalid parse") => super(message)
-    }
-
-    class MissingMatchingTokenException extends InvalidParseException {
-        public construct(Char token) => super("Missing matching '#token' token")
-    }
+  class MissingMatchingTokenException extends InvalidParseException {
+    public construct(Char token) => super("Missing matching '#token' token")
+  }
 }
