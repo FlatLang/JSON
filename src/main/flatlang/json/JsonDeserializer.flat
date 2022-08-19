@@ -1,10 +1,10 @@
-package "flatlang/json"
+package flatlang/json
 
-import "flatlang/datastruct/HashMap"
-import "flatlang/io/File"
-import "flatlang/io/FileReader"
+import flatlang/datastruct/HashMap
+import flatlang/io/File
+import flatlang/io/FileReader
 
-import "flatlang/extensions/SyntaxStringFunctions"
+import flatlang/extensions/SyntaxStringFunctions
 
 class {
   public parse(File file) => parse(FileReader(file).readAllContents())
