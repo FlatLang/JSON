@@ -1,12 +1,17 @@
 package flatlang/json
 
+import flat/log/Logger
+
 import flatlang/datastruct/HashMap
 import flatlang/io/File
 import flatlang/io/FileReader
+import flatlang/time/Timer
 
 import flatlang/extensions/SyntaxStringFunctions
 
 class {
+  let static Logger log = Logger(JsonDeserializer.class)
+
   public parse(File file) => parse(FileReader(file).readAllContents())
 
   public parse(String json) -> Object {
@@ -55,7 +60,21 @@ class {
   public isString(String json) => isSingleQuoteString(json) || isDoubleQuoteString(json)
   public isBool(String json) => json == "true" || json == "false"
 
-  public parseObject(File file) => parseObject(FileReader(file).readAllContents())
+  public parseObject(File file) -> HashMap<String, Object> {
+    log.trace("Reading \"#{file.normalizedLocation}\" contents ...")
+    let timer = Timer():start()
+    let contents = FileReader(file).readAllContents()
+    timer.stop()
+    log.trace("Reading \"#{file.normalizedLocation}\" contents took #{timer.duration}ms")
+
+    log.trace("Parsing \"#{file.normalizedLocation}\" contents ...")
+    timer:reset():start()
+    let result = parseObject(contents)
+    timer.stop()
+    log.trace("Parsing \"#{file.normalizedLocation}\" contents took #{timer.duration}ms")
+
+    return result
+  }
   public parseObject(File file, HashMap<String, Object> map) => parseObject(FileReader(file).readAllContents(), map)
   public parseObject(String json) => parseObject(json, HashMap(5, 5))
   public parseObject(String json, HashMap<String, Object> map) => map {
