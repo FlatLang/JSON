@@ -38,6 +38,22 @@ class {
     }
   }
 
+  public parseArray(File file) -> Object[] => null {
+    log.trace("Reading \"#{file.normalizedLocation}\" contents ...")
+    let timer = Timer():start()
+    let contents = FileReader(file).readAllContents()
+    timer.stop()
+    log.trace("Reading \"#{file.normalizedLocation}\" contents took #{timer.duration}ms")
+
+    log.trace("Parsing \"#{file.normalizedLocation}\" contents ...")
+    timer:reset():start()
+    let result = parseArray(contents)
+    timer.stop()
+    log.trace("Parsing \"#{file.normalizedLocation}\" contents took #{timer.duration}ms")
+
+    return result
+  }
+
   public parseArray(String json) -> Object[] => null {
     let trimmed = json.trim()
 
