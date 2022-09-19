@@ -1,6 +1,6 @@
-package flatlang/json
+package flat/json
 
-import flatlang/json/JsonDeserializer
+import flat/json/JsonDeserializer
 
 testable class {
   test `can create`() {

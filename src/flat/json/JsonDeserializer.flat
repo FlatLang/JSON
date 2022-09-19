@@ -1,13 +1,13 @@
-package flatlang/json
+package flat/json
 
 import flat/log/Logger
 
-import flatlang/datastruct/HashMap
-import flatlang/io/File
-import flatlang/io/FileReader
-import flatlang/time/Timer
+import flat/datastruct/HashMap
+import flat/io/File
+import flat/io/FileReader
+import flat/time/Timer
 
-import flatlang/extensions/SyntaxStringFunctions
+import flat/extensions/SyntaxStringFunctions
 
 class {
   let static Logger log = Logger(JsonDeserializer.class)
