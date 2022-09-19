@@ -1,7 +1,6 @@
 package flat/json
 
 import flat/log/Logger
-
 import flat/datastruct/HashMap
 import flat/io/File
 import flat/io/FileReader
