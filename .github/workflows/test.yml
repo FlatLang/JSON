@@ -47,14 +47,6 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - name: Setup Airship
-        run: |
-          node airship.js setup
-
-      - name: Link Json
-        run: |
-          node airship.js reinstall --link
-
       - name: Build Json Test
         run: |
           node airship.js install test -t es6
